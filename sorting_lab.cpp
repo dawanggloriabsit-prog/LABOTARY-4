@@ -1,143 +1,171 @@
 #include <iostream>
 using namespace std;
 
-// Bubble Sort
-void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++)
-        for (int j = 0; j < n - i - 1; j++)
-            if (arr[j] > arr[j + 1])
-                swap(arr[j], arr[j + 1]);
-}
-
-// Insertion Sort
-void insertionSort(int arr[], int n) {
-    for (int i = 1; i < n; i++) {
-        int key = arr[i];
-        int j = i - 1;
-        while (j >= 0 && arr[j] > key) {
-            arr[j + 1] = arr[j];
-            j--;
+// ------- Bubble Sort -------
+void bubbleSort(int a[], int n) {
+    bool swapped;
+    for (int pass = 0; pass < n - 1; pass++) {
+        swapped = false;
+        for (int j = 0; j < n - pass - 1; j++) {
+            if (a[j] > a[j + 1]) {
+                swap(a[j], a[j + 1]);
+                swapped = true;
+            }
         }
-        arr[j + 1] = key;
+        if (!swapped) break;
     }
 }
 
-// Selection Sort
-void selectionSort(int arr[], int n) {
+// ------- Insertion Sort -------
+void insertionSort(int a[], int n) {
+    for (int i = 1; i < n; i++) {
+        int temp = a[i];
+        int pos = i - 1;
+
+        while (pos >= 0 && a[pos] > temp) {
+            a[pos + 1] = a[pos];
+            pos--;
+        }
+
+        a[pos + 1] = temp;
+    }
+}
+
+// ------- Selection Sort -------
+void selectionSort(int a[], int n) {
     for (int i = 0; i < n - 1; i++) {
-        int minIndex = i;
-        for (int j = i + 1; j < n; j++)
-            if (arr[j] < arr[minIndex])
-                minIndex = j;
-        swap(arr[minIndex], arr[i]);
+        int minLoc = i;
+        for (int j = i + 1; j < n; j++) {
+            if (a[j] < a[minLoc])
+                minLoc = j;
+        }
+        swap(a[i], a[minLoc]);
     }
 }
 
-// Merge Sort
-void merge(int arr[], int left, int mid, int right) {
+// ------- Merge Sort -------
+void merge(int a[], int left, int mid, int right) {
     int n1 = mid - left + 1;
     int n2 = right - mid;
 
-    int L[n1], R[n2];
+    int *L = new int[n1];
+    int *R = new int[n2];
 
-    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
-    for (int i = 0; i < n2; i++) R[i] = arr[mid + 1 + i];
+    for (int i = 0; i < n1; i++) L[i] = a[left + i];
+    for (int j = 0; j < n2; j++) R[j] = a[mid + 1 + j];
 
     int i = 0, j = 0, k = left;
+
     while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) arr[k++] = L[i++];
-        else arr[k++] = R[j++];
+        if (L[i] <= R[j])
+            a[k++] = L[i++];
+        else
+            a[k++] = R[j++];
     }
 
-    while (i < n1) arr[k++] = L[i++];
-    while (j < n2) arr[k++] = R[j++];
+    while (i < n1) a[k++] = L[i++];
+    while (j < n2) a[k++] = R[j++];
+
+    delete[] L;
+    delete[] R;
 }
 
-void mergeSort(int arr[], int left, int right) {
-    if (left < right) {
-        int mid = (left + right) / 2;
-        mergeSort(arr, left, mid);
-        mergeSort(arr, mid + 1, right);
-        merge(arr, left, mid, right);
-    }
+void mergeSort(int a[], int left, int right) {
+    if (left >= right) return;
+
+    int mid = (left + right) / 2;
+
+    mergeSort(a, left, mid);
+    mergeSort(a, mid + 1, right);
+    merge(a, left, mid, right);
 }
 
-// Quick Sort
-int partitionQS(int arr[], int low, int high) {
-    int pivot = arr[high];
-    int i = low - 1;
+// ------- Quick Sort -------
+int divide(int a[], int low, int high) {
+    int pivot = a[high];
+    int i = low;
 
     for (int j = low; j < high; j++) {
-        if (arr[j] < pivot) {
+        if (a[j] <= pivot) {
+            swap(a[i], a[j]);
             i++;
-            swap(arr[i], arr[j]);
         }
     }
-
-    swap(arr[i + 1], arr[high]);
-    return i + 1;
+    swap(a[i], a[high]);
+    return i;
 }
 
-void quickSort(int arr[], int low, int high) {
+void quickSort(int a[], int low, int high) {
     if (low < high) {
-        int pi = partitionQS(arr, low, high);
-        quickSort(arr, low, pi - 1);
-        quickSort(arr, pi + 1, high);
+        int pi = divide(a, low, high);
+        quickSort(a, low, pi - 1);
+        quickSort(a, pi + 1, high);
     }
 }
 
-// Heap Sort
-void heapify(int arr[], int n, int i) {
-    int largest = i;
+// ------- Heap Sort -------
+void heapify(int a[], int n, int i) {
+    int big = i;
     int left = 2 * i + 1;
     int right = 2 * i + 2;
 
-    if (left < n && arr[left] > arr[largest]) largest = left;
-    if (right < n && arr[right] > arr[largest]) largest = right;
+    if (left < n && a[left] > a[big]) big = left;
+    if (right < n && a[right] > a[big]) big = right;
 
-    if (largest != i) {
-        swap(arr[i], arr[largest]);
-        heapify(arr, n, largest);
+    if (big != i) {
+        swap(a[i], a[big]);
+        heapify(a, n, big);
     }
 }
 
-void heapSort(int arr[], int n) {
+void heapSort(int a[], int n) {
     for (int i = n / 2 - 1; i >= 0; i--)
-        heapify(arr, n, i);
+        heapify(a, n, i);
 
     for (int i = n - 1; i > 0; i--) {
-        swap(arr[0], arr[i]);
-        heapify(arr, i, 0);
+        swap(a[0], a[i]);
+        heapify(a, i, 0);
     }
 }
 
-// Shell Sort
-void shellSort(int arr[], int n) {
-    for (int gap = n / 2; gap > 0; gap /= 2)
+// ------- Shell Sort -------
+void shellSort(int a[], int n) {
+    for (int gap = n / 2; gap > 0; gap /= 2) {
         for (int i = gap; i < n; i++) {
-            int temp = arr[i], j = i;
-            while (j >= gap && arr[j - gap] > temp) {
-                arr[j] = arr[j - gap];
+            int temp = a[i];
+            int j = i;
+
+            while (j >= gap && a[j - gap] > temp) {
+                a[j] = a[j - gap];
                 j -= gap;
             }
-            arr[j] = temp;
+
+            a[j] = temp;
         }
+    }
 }
 
 int main() {
-    int n = 10, arr[10];
-    cout << "Enter 10 integers:\n";
-    for (int i = 0; i < n; i++) cin >> arr[i];
+    int arr[10];
+    int n = 10;
 
-    cout << "\nChoose Sorting Algorithm:\n";
-    cout << "[1] Bubble Sort\n";
-    cout << "[2] Insertion Sort\n";
-    cout << "[3] Selection Sort\n";
-    cout << "[4] Merge Sort\n";
-    cout << "[5] Quick Sort\n";
-    cout << "[6] Heap Sort\n";
-    cout << "[7] Shell Sort\n";
-    int choice; cin >> choice;
+    cout << "Enter 10 numbers:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+    }
+
+    cout << "\nSorting options:\n";
+    cout << "1 - Bubble Sort\n";
+    cout << "2 - Insertion Sort\n";
+    cout << "3 - Selection Sort\n";
+    cout << "4 - Merge Sort\n";
+    cout << "5 - Quick Sort\n";
+    cout << "6 - Heap Sort\n";
+    cout << "7 - Shell Sort\n";
+    cout << "Pick: ";
+
+    int choice;
+    cin >> choice;
 
     switch (choice) {
         case 1: bubbleSort(arr, n); break;
@@ -147,10 +175,13 @@ int main() {
         case 5: quickSort(arr, 0, n - 1); break;
         case 6: heapSort(arr, n); break;
         case 7: shellSort(arr, n); break;
-        default: cout << "Invalid choice!"; return 0;
+        default: cout << "Invalid choice.\n"; return 0;
     }
 
-    cout << "\nSorted Array: ";
-    for (int i = 0; i < n; i++) cout << arr[i] << " ";
+    cout << "\nSorted Array:\n";
+    for (int i = 0; i < n; i++)
+        cout << arr[i] << " ";
     cout << endl;
+
+    return 0;
 }
